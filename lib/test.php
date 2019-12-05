@@ -28,6 +28,13 @@ function start_game(){
 	print json_encode($res2->fetch_all(MYSQLI_ASSOC), JSON_PRETTY_PRINT);
 }
 
+function show_game(){
+	//syndesh sth bash
+	//erothma gia na doyme ta fylla toy kathe paikth
+	//erothma gia to fylo toy trapezioy
+	//emfanish apotelesmatos
+}
+
 function reset_game(){
 	global $mysqli;
 	$sql = 'call clean_deck()';

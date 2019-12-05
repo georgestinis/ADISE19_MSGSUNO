@@ -1,7 +1,7 @@
 <?php
 $host='localhost';
 $db='uno';
-require_once "../local_config.php";
+require_once "local_config.php";
 
 $user=USERNAME;
 $pass=DB_PWD;

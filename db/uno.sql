@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Φιλοξενητής: 127.0.0.1
--- Χρόνος δημιουργίας: 05 Δεκ 2019 στις 12:38:57
+-- Χρόνος δημιουργίας: 05 Δεκ 2019 στις 13:17:24
 -- Έκδοση διακομιστή: 10.4.8-MariaDB
--- Έκδοση PHP: 7.1.33
+-- Έκδοση PHP: 7.3.11
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET AUTOCOMMIT = 0;
@@ -22,12 +22,44 @@ SET time_zone = "+00:00";
 -- Βάση δεδομένων: `uno`
 --
 
+DELIMITER $$
+--
+-- Διαδικασίες
+--
+DROP PROCEDURE IF EXISTS `clean_deck`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `clean_deck` ()  BEGIN
+	REPLACE INTO remaining_deck SELECT * FROM deck;
+    DELETE FROM hand;
+    DELETE FROM table_deck;
+END$$
+
+DROP PROCEDURE IF EXISTS `do_move`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `do_move` (IN `table_card_color` ENUM('R','Y','B','G','W'), IN `c_code` VARCHAR(3))  BEGIN
+	DECLARE c_id TINYINT;
+	DECLARE c_color ENUM('R','Y','B','G','W');
+    SELECT deck.card_color, hand.card_id into c_color, c_id FROM hand INNER JOIN deck on hand.card_id=deck.card_id WHERE deck.card_id=c_code;
+    IF c_color = table_card_color THEN
+    	INSERT INTO table_deck (card_code) VALUES (c_id);
+    END IF;
+END$$
+
+DROP PROCEDURE IF EXISTS `draw_card`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `draw_card` (IN `player_id` TINYINT)  BEGIN
+    DECLARE c_id tinyint;
+    SELECT card_id into c_id FROM remaining_deck ORDER BY RAND() LIMIT 1; 
+    INSERT INTO hand VALUES (player_id, c_id);
+    DELETE FROM remaining_deck WHERE card_id=c_id;
+END$$
+
+DELIMITER ;
+
 -- --------------------------------------------------------
 
 --
 -- Δομή πίνακα για τον πίνακα `deck`
 --
 
+DROP TABLE IF EXISTS `deck`;
 CREATE TABLE `deck` (
   `card_id` tinyint(4) NOT NULL,
   `card_symbol` enum('0','1','2','3','4','5','6','7','8','9','+4','+2','R','S','N') COLLATE utf8_bin NOT NULL,
@@ -155,6 +187,7 @@ INSERT INTO `deck` (`card_id`, `card_symbol`, `card_color`, `card_code`) VALUES
 -- Δομή πίνακα για τον πίνακα `game_status`
 --
 
+DROP TABLE IF EXISTS `game_status`;
 CREATE TABLE `game_status` (
   `status` enum('not active','initialized','started','ended','aborded') COLLATE utf8_bin NOT NULL DEFAULT 'not active',
   `p_turn` enum('p1','p2') COLLATE utf8_bin DEFAULT NULL,
@@ -162,21 +195,14 @@ CREATE TABLE `game_status` (
   `last_change` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
---
--- Άδειασμα δεδομένων του πίνακα `game_status`
---
-
-INSERT INTO `game_status` (`status`, `p_turn`, `result`, `last_change`) VALUES
-('not active', NULL, NULL, NULL);
-
 -- --------------------------------------------------------
 
 --
 -- Δομή πίνακα για τον πίνακα `hand`
 --
 
+DROP TABLE IF EXISTS `hand`;
 CREATE TABLE `hand` (
-  `hand_id` int(11) NOT NULL,
   `player_id` int(11) NOT NULL,
   `card_id` tinyint(4) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
@@ -187,6 +213,7 @@ CREATE TABLE `hand` (
 -- Δομή πίνακα για τον πίνακα `player`
 --
 
+DROP TABLE IF EXISTS `player`;
 CREATE TABLE `player` (
   `player_id` int(11) NOT NULL,
   `player_name` enum('p1','p2') COLLATE utf8_bin NOT NULL,
@@ -198,7 +225,8 @@ CREATE TABLE `player` (
 --
 
 INSERT INTO `player` (`player_id`, `player_name`, `username`) VALUES
-(1, 'p1', 'georgestinis');
+(1, 'p1', 'georgestinis'),
+(2, 'p1', 'msg');
 
 -- --------------------------------------------------------
 
@@ -206,6 +234,7 @@ INSERT INTO `player` (`player_id`, `player_name`, `username`) VALUES
 -- Δομή πίνακα για τον πίνακα `remaining_deck`
 --
 
+DROP TABLE IF EXISTS `remaining_deck`;
 CREATE TABLE `remaining_deck` (
   `card_id` tinyint(4) NOT NULL,
   `card_symbol` enum('0','1','2','3','4','5','6','7','8','9','+4','+2','R','S','N') COLLATE utf8_bin NOT NULL,
@@ -333,9 +362,10 @@ INSERT INTO `remaining_deck` (`card_id`, `card_symbol`, `card_color`, `card_code
 -- Δομή πίνακα για τον πίνακα `table_deck`
 --
 
+DROP TABLE IF EXISTS `table_deck`;
 CREATE TABLE `table_deck` (
   `table_id` tinyint(4) NOT NULL,
-  `card_id` tinyint(4) NOT NULL
+  `card_code` varchar(3) COLLATE utf8_bin NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 --
@@ -352,8 +382,7 @@ ALTER TABLE `deck`
 -- Ευρετήρια για πίνακα `hand`
 --
 ALTER TABLE `hand`
-  ADD PRIMARY KEY (`hand_id`,`player_id`,`card_id`),
-  ADD KEY `player_id` (`player_id`),
+  ADD PRIMARY KEY (`player_id`,`card_id`) USING BTREE,
   ADD KEY `card_id` (`card_id`);
 
 --
@@ -373,6 +402,16 @@ ALTER TABLE `remaining_deck`
 --
 ALTER TABLE `table_deck`
   ADD PRIMARY KEY (`table_id`);
+
+--
+-- AUTO_INCREMENT για άχρηστους πίνακες
+--
+
+--
+-- AUTO_INCREMENT για πίνακα `table_deck`
+--
+ALTER TABLE `table_deck`
+  MODIFY `table_id` tinyint(4) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- Περιορισμοί για άχρηστους πίνακες
