@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Φιλοξενητής: 127.0.0.1
--- Χρόνος δημιουργίας: 25 Νοε 2019 στις 18:51:35
+-- Χρόνος δημιουργίας: 05 Δεκ 2019 στις 12:38:57
 -- Έκδοση διακομιστή: 10.4.8-MariaDB
--- Έκδοση PHP: 7.3.11
+-- Έκδοση PHP: 7.1.33
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET AUTOCOMMIT = 0;
@@ -152,6 +152,26 @@ INSERT INTO `deck` (`card_id`, `card_symbol`, `card_color`, `card_code`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Δομή πίνακα για τον πίνακα `game_status`
+--
+
+CREATE TABLE `game_status` (
+  `status` enum('not active','initialized','started','ended','aborded') COLLATE utf8_bin NOT NULL DEFAULT 'not active',
+  `p_turn` enum('p1','p2') COLLATE utf8_bin DEFAULT NULL,
+  `result` enum('p1','p2','d') COLLATE utf8_bin DEFAULT NULL,
+  `last_change` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+--
+-- Άδειασμα δεδομένων του πίνακα `game_status`
+--
+
+INSERT INTO `game_status` (`status`, `p_turn`, `result`, `last_change`) VALUES
+('not active', NULL, NULL, NULL);
+
+-- --------------------------------------------------------
+
+--
 -- Δομή πίνακα για τον πίνακα `hand`
 --
 
@@ -169,6 +189,7 @@ CREATE TABLE `hand` (
 
 CREATE TABLE `player` (
   `player_id` int(11) NOT NULL,
+  `player_name` enum('p1','p2') COLLATE utf8_bin NOT NULL,
   `username` varchar(20) COLLATE utf8_bin NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
@@ -176,8 +197,8 @@ CREATE TABLE `player` (
 -- Άδειασμα δεδομένων του πίνακα `player`
 --
 
-INSERT INTO `player` (`player_id`, `username`) VALUES
-(1, 'georgestinis');
+INSERT INTO `player` (`player_id`, `player_name`, `username`) VALUES
+(1, 'p1', 'georgestinis');
 
 -- --------------------------------------------------------
 
