@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Φιλοξενητής: 127.0.0.1
--- Χρόνος δημιουργίας: 06 Δεκ 2019 στις 10:19:28
+-- Χρόνος δημιουργίας: 06 Δεκ 2019 στις 14:47:13
 -- Έκδοση διακομιστή: 10.4.8-MariaDB
 -- Έκδοση PHP: 7.3.11
 
@@ -44,10 +44,10 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `do_move` (IN `table_card_color` ENU
 END$$
 
 DROP PROCEDURE IF EXISTS `draw_card`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `draw_card` (IN `player_id` TINYINT)  BEGIN
+CREATE DEFINER=`root`@`localhost` PROCEDURE `draw_card` (IN `player_name` ENUM('p1','p2') CHARSET utf8)  BEGIN
     DECLARE c_id tinyint;
     SELECT card_id into c_id FROM remaining_deck ORDER BY RAND() LIMIT 1; 
-    INSERT INTO hand VALUES (player_id, c_id);
+    INSERT INTO hand VALUES (player_name, c_id);
     DELETE FROM remaining_deck WHERE card_id=c_id;
 END$$
 
@@ -217,26 +217,6 @@ CREATE TABLE `hand` (
   `player_name` enum('p1','p2') COLLATE utf8_bin NOT NULL,
   `card_id` tinyint(4) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
-
---
--- Άδειασμα δεδομένων του πίνακα `hand`
---
-
-INSERT INTO `hand` (`player_name`, `card_id`) VALUES
-('p1', 1),
-('p1', 7),
-('p1', 22),
-('p1', 31),
-('p1', 36),
-('p1', 45),
-('p1', 48),
-('p1', 64),
-('p1', 67),
-('p1', 69),
-('p1', 74),
-('p1', 95),
-('p1', 98),
-('p1', 104);
 
 -- --------------------------------------------------------
 

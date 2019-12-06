@@ -13,11 +13,12 @@
 				case '':
 				case null: handle_game($method);
 					break;
-				case 'bla': ;
+				case 'bla': echo("bla");
 					break;
 				default: header("HTTP/1.1 404 Not Found");
 					break;
 			}
+			break;
 		case 'status':
 			if(sizeof($request)==0){
 				show_status();
@@ -26,7 +27,7 @@
 				header("HTTP/1.1 404 Not Found");
 			}
 			break;
-		case 'players': ;
+		case 'players': echo("bla");
 			break;
 		default: header("HTTP/1.1 404 Not Found");
 			exit;

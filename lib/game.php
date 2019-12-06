@@ -1,6 +1,4 @@
 <?php
-	
-	require_once 'dbconnect.php';
 	function show_status() {
 		global $mysqli;
 		$sql = 'select * from game_status';
