@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Φιλοξενητής: 127.0.0.1
--- Χρόνος δημιουργίας: 05 Δεκ 2019 στις 13:17:24
+-- Χρόνος δημιουργίας: 06 Δεκ 2019 στις 10:19:28
 -- Έκδοση διακομιστή: 10.4.8-MariaDB
 -- Έκδοση PHP: 7.3.11
 
@@ -195,6 +195,17 @@ CREATE TABLE `game_status` (
   `last_change` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
+--
+-- Δείκτες `game_status`
+--
+DROP TRIGGER IF EXISTS `game_status_update`;
+DELIMITER $$
+CREATE TRIGGER `game_status_update` BEFORE UPDATE ON `game_status` FOR EACH ROW BEGIN
+	set NEW.last_change = now();
+END
+$$
+DELIMITER ;
+
 -- --------------------------------------------------------
 
 --
@@ -203,9 +214,29 @@ CREATE TABLE `game_status` (
 
 DROP TABLE IF EXISTS `hand`;
 CREATE TABLE `hand` (
-  `player_id` int(11) NOT NULL,
+  `player_name` enum('p1','p2') COLLATE utf8_bin NOT NULL,
   `card_id` tinyint(4) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+--
+-- Άδειασμα δεδομένων του πίνακα `hand`
+--
+
+INSERT INTO `hand` (`player_name`, `card_id`) VALUES
+('p1', 1),
+('p1', 7),
+('p1', 22),
+('p1', 31),
+('p1', 36),
+('p1', 45),
+('p1', 48),
+('p1', 64),
+('p1', 67),
+('p1', 69),
+('p1', 74),
+('p1', 95),
+('p1', 98),
+('p1', 104);
 
 -- --------------------------------------------------------
 
@@ -215,7 +246,6 @@ CREATE TABLE `hand` (
 
 DROP TABLE IF EXISTS `player`;
 CREATE TABLE `player` (
-  `player_id` int(11) NOT NULL,
   `player_name` enum('p1','p2') COLLATE utf8_bin NOT NULL,
   `username` varchar(20) COLLATE utf8_bin NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
@@ -224,9 +254,8 @@ CREATE TABLE `player` (
 -- Άδειασμα δεδομένων του πίνακα `player`
 --
 
-INSERT INTO `player` (`player_id`, `player_name`, `username`) VALUES
-(1, 'p1', 'georgestinis'),
-(2, 'p1', 'msg');
+INSERT INTO `player` (`player_name`, `username`) VALUES
+('p1', 'georgestinis');
 
 -- --------------------------------------------------------
 
@@ -247,13 +276,11 @@ CREATE TABLE `remaining_deck` (
 --
 
 INSERT INTO `remaining_deck` (`card_id`, `card_symbol`, `card_color`, `card_code`) VALUES
-(1, '0', 'R', '0R'),
 (2, '1', 'R', '1R'),
 (3, '1', 'R', '1R'),
 (4, '2', 'R', '2R'),
 (5, '2', 'R', '2R'),
 (6, '3', 'R', '3R'),
-(7, '3', 'R', '3R'),
 (8, '4', 'R', '4R'),
 (9, '4', 'R', '4R'),
 (10, '5', 'R', '5R'),
@@ -268,7 +295,6 @@ INSERT INTO `remaining_deck` (`card_id`, `card_symbol`, `card_color`, `card_code
 (19, '9', 'R', '9R'),
 (20, '+2', 'R', '+2R'),
 (21, '+2', 'R', '+2R'),
-(22, 'R', 'R', 'RR'),
 (23, 'R', 'R', 'RR'),
 (24, 'S', 'R', 'SR'),
 (25, 'S', 'R', 'SR'),
@@ -277,12 +303,10 @@ INSERT INTO `remaining_deck` (`card_id`, `card_symbol`, `card_color`, `card_code
 (28, '1', 'Y', '1Y'),
 (29, '2', 'Y', '2Y'),
 (30, '2', 'Y', '2Y'),
-(31, '3', 'Y', '3Y'),
 (32, '3', 'Y', '3Y'),
 (33, '4', 'Y', '4Y'),
 (34, '4', 'Y', '4Y'),
 (35, '5', 'Y', '5Y'),
-(36, '5', 'Y', '5Y'),
 (37, '6', 'Y', '6Y'),
 (38, '6', 'Y', '6Y'),
 (39, '7', 'Y', '7Y'),
@@ -291,10 +315,8 @@ INSERT INTO `remaining_deck` (`card_id`, `card_symbol`, `card_color`, `card_code
 (42, '8', 'Y', '8Y'),
 (43, '9', 'Y', '9Y'),
 (44, '9', 'Y', '9Y'),
-(45, '+2', 'Y', '+2Y'),
 (46, '+2', 'Y', '+2Y'),
 (47, 'R', 'Y', 'RY'),
-(48, 'R', 'Y', 'RY'),
 (49, 'S', 'Y', 'SY'),
 (50, 'S', 'Y', 'SY'),
 (51, '0', 'B', '0B'),
@@ -310,17 +332,13 @@ INSERT INTO `remaining_deck` (`card_id`, `card_symbol`, `card_color`, `card_code
 (61, '5', 'B', '5B'),
 (62, '6', 'B', '6B'),
 (63, '6', 'B', '6B'),
-(64, '7', 'B', '7B'),
 (65, '7', 'B', '7B'),
 (66, '8', 'B', '8B'),
-(67, '8', 'B', '8B'),
 (68, '9', 'B', '9B'),
-(69, '9', 'B', '9B'),
 (70, '+2', 'B', '+2B'),
 (71, '+2', 'B', '+2B'),
 (72, 'R', 'B', 'RB'),
 (73, 'R', 'B', 'RB'),
-(74, 'S', 'B', 'SB'),
 (75, 'S', 'B', 'SB'),
 (76, '0', 'G', '0G'),
 (77, '1', 'G', '1G'),
@@ -341,16 +359,13 @@ INSERT INTO `remaining_deck` (`card_id`, `card_symbol`, `card_color`, `card_code
 (92, '8', 'G', '8G'),
 (93, '9', 'G', '9G'),
 (94, '9', 'G', '9G'),
-(95, '+2', 'G', '+2G'),
 (96, '+2', 'G', '+2G'),
 (97, 'R', 'G', 'RG'),
-(98, 'R', 'G', 'RG'),
 (99, 'S', 'G', 'SG'),
 (100, 'S', 'G', 'SG'),
 (101, '+4', 'W', '4W'),
 (102, '+4', 'W', '4W'),
 (103, '+4', 'W', '4W'),
-(104, '+4', 'W', '4W'),
 (105, 'N', 'W', 'NW'),
 (106, 'N', 'W', 'NW'),
 (107, 'N', 'W', 'NW'),
@@ -382,14 +397,14 @@ ALTER TABLE `deck`
 -- Ευρετήρια για πίνακα `hand`
 --
 ALTER TABLE `hand`
-  ADD PRIMARY KEY (`player_id`,`card_id`) USING BTREE,
-  ADD KEY `card_id` (`card_id`);
+  ADD PRIMARY KEY (`card_id`,`player_name`) USING BTREE,
+  ADD KEY `player_name` (`player_name`);
 
 --
 -- Ευρετήρια για πίνακα `player`
 --
 ALTER TABLE `player`
-  ADD PRIMARY KEY (`player_id`);
+  ADD PRIMARY KEY (`player_name`);
 
 --
 -- Ευρετήρια για πίνακα `remaining_deck`
@@ -422,7 +437,7 @@ ALTER TABLE `table_deck`
 --
 ALTER TABLE `hand`
   ADD CONSTRAINT `card_id` FOREIGN KEY (`card_id`) REFERENCES `deck` (`card_id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `player_id` FOREIGN KEY (`player_id`) REFERENCES `player` (`player_id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `player_name` FOREIGN KEY (`player_name`) REFERENCES `player` (`player_name`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
