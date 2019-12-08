@@ -9,8 +9,7 @@ $(function () {
 });
 
 
-function fill_game(){
-	
+function fill_game(){	
 	$.ajax({type:"GET", url: "uno.php/game/", dataType:"json", success: fill_game_by_data });
 }
 
@@ -18,15 +17,21 @@ function fill_game_by_data(data){
 	$('#player1_cards').html("");
 	$('#player2_cards').html("");
 	for(var i=0; i<data.length; i++){
-		console.log(i);
-		var obj = data[i];
-		if(obj.player_name=='p1'){
-			$('#player1_cards').append(obj.card_code);
-			$('#player1_cards').append("&nbsp;&nbsp;&nbsp;&nbsp;");
-		}else if(obj.player_name=='p2'){
-			$('#player2_cards').append(obj.card_code);
-			$('#player2_cards').append("&nbsp;&nbsp;&nbsp;&nbsp;");
-			
+		for(var j=0; j<data[i].length; j++){
+			console.log(j);
+			var obj = data[i][j];
+			if(i==0){
+				if(obj.player_name=='p1'){
+					$('#player1_cards').append(obj.card_code);
+					$('#player1_cards').append("&nbsp;&nbsp;&nbsp;&nbsp;");
+				}else if(obj.player_name=='p2'){
+					$('#player2_cards').append(obj.card_code);
+					$('#player2_cards').append("&nbsp;&nbsp;&nbsp;&nbsp;");
+				}
+			}
+			else{
+				$('#table_card').html(obj.card_code);
+			}
 		}
 	}
 }
@@ -34,7 +39,7 @@ function draw(){
 	
 }
 function do_reset(e) {
-	$.ajax({type: 'POST', url: "uno.php/game", dataType: "json", 
+	$.ajax({type: 'POST', url: "uno.php/game/", dataType: "json", 
 			success: fill_game_by_data,
 			//error: alert("error")
 			});
