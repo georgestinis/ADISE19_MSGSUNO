@@ -8,18 +8,22 @@ function start_game(){
 		$mysqli->query($sqlp1);
 		$mysqli->query($sqlp2);
 	}
-	$sql = 'select h.player_name, card_code from hand h inner join deck d on h.card_id=d.card_id';
+	$sql = 'select h.player_name, d.card_code from hand h inner join deck d on h.card_id=d.card_id';
 	$st = $mysqli->query($sql);
 	header('Content-type: application/json');
 	print json_encode($st->fetch_all(MYSQLI_ASSOC), JSON_PRETTY_PRINT);
 }
 
-//function show_game(){
-	//syndesh sth bash
-	//erothma gia na doyme ta fylla toy kathe paikth
+function show_game(){
+	global $mysqli;
+	$sql = 'select h.player_name, d.card_code from hand h inner join deck d on h.card_id=d.card_id';
+	
 	//erothma gia to fylo toy trapezioy
-	//emfanish apotelesmatos
-//}
+	
+	$st = $mysqli->query($sql);
+	header('Content-type: application/json');
+	print json_encode($st->fetch_all(MYSQLI_ASSOC), JSON_PRETTY_PRINT);
+}
 
 function reset_game(){
 	global $mysqli;

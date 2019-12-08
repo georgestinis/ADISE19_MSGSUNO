@@ -35,7 +35,9 @@
 	
 	function handle_game($method){
 		if($method=='GET'){
+			
 			show_game();
+			
 		}
 		else if($method=='POST'){
 			reset_game();
