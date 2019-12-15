@@ -2,6 +2,7 @@
 	require_once "lib/dbconnect.php";
 	require_once "lib/test.php";
 	require_once "lib/game.php";
+	require_once "lib/users.php";
 	
 	$method = $_SERVER['REQUEST_METHOD'];
 	$request = explode('/', trim($_SERVER['PATH_INFO'],'/'));
@@ -14,6 +15,8 @@
 				case null: handle_game($method);
 					break;
 				case 'draw': draw_card();
+					break;
+				case 'pass': pass_status();
 					break;
 				default: header("HTTP/1.1 404 Not Found");
 					break;
@@ -59,7 +62,7 @@
 			case 'p2': handle_user($method, $b, $input);
 				break;
 			default: header("HTTP/1.1 404 Not Found");
-					print json_encode(['errormesg'=>"Player $b not found."]);
+					 print json_encode(['errormesg'=>"Player $b not found."]);
                 break;
 		}
 	}
