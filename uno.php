@@ -13,7 +13,7 @@
 				case '':
 				case null: handle_game($method);
 					break;
-				case 'bla': echo("bla");
+				case 'draw': draw_card();
 					break;
 				default: header("HTTP/1.1 404 Not Found");
 					break;
@@ -27,7 +27,7 @@
 				header("HTTP/1.1 404 Not Found");
 			}
 			break;
-		case 'players': echo("bla");
+		case 'players': handle_players($method, $request, $input );
 			break;
 		default: header("HTTP/1.1 404 Not Found");
 			exit;
@@ -41,6 +41,26 @@
 		}
 		else if($method=='POST'){
 			reset_game();
+		}
+	}
+	function handle_players($method, $request, $input){
+		switch ($b=array_shift($request)){
+			case "":
+			case null:
+				if($method=='GET'){
+					show_users($method);
+				}
+				else{
+					header("HTTP/1.1 400 Bad Request"); 
+                    print json_encode(['errormesg'=>"Method $method not allowed here."]);
+				}
+				break;
+			case 'p1':
+			case 'p2': handle_user($method, $b, $input);
+				break;
+			default: header("HTTP/1.1 404 Not Found");
+					print json_encode(['errormesg'=>"Player $b not found."]);
+                break;
 		}
 	}
 ?>

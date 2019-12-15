@@ -5,7 +5,16 @@ $(function () {
 	$('#say_uno').click(say_uno);
 	$('#draw').click(draw);
 	$('#pass').click(pass);
-	
+	$('#uno_login').click(login_to_game);
+    $('#do_move').prop('disabled', true);
+    $('#nextmove').prop('disabled', true);
+    $('#pass').prop('disabled', true);
+    $('#draw').prop('disabled', true);
+    $('#say_uno').prop('disabled', true);
+    //$('#pass_div').hide();
+    //$('#uno_card').hide();
+    //$('#deck').hide();
+    game_status_update();
 });
 
 
@@ -35,14 +44,20 @@ function fill_game_by_data(data){
 		}
 	}
 }
-function draw(){
-	
+function draw(e){
+	$.ajax({type:"PUT",url:"uno.php/game/draw", dataType:"json", success:fill_game_by_data});
 }
+
 function do_reset(e) {
 	$.ajax({type: 'POST', url: "uno.php/game/", dataType: "json", 
 			success: fill_game_by_data,
 			//error: alert("error")
 			});
 }
+
+function game_status_update(){
+	$.ajax({url:"uno.php/status/", success:update_status});
+}
+
 
 

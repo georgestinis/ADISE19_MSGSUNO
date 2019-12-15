@@ -11,7 +11,7 @@ function start_game(){
 	}
 	$mysqli->query($sqlp3);
 	$sql = 'select h.player_name, d.card_code from hand h inner join deck d on h.card_id=d.card_id';
-	$st = $mysqli->query($sql);
+	// $st = $mysqli->query($sql);
 	$sql1 = 'select * from table_deck order by table_id desc limit 1';
 	$st1 = $mysqli->query($sql1);
 	$res1 = $st->fetch_all(MYSQLI_ASSOC);
@@ -37,5 +37,17 @@ function reset_game(){
 	$sql = 'call clean_deck()';
 	$mysqli->query($sql);
 	start_game();
+}
+function draw_card(){
+	echo("bla");
+	global $mysqli;
+	$sql = 'select p_turn from game_status limit 1';
+	$st=$mysqli->query($sql);
+	$res=$st->fetch_assoc();
+	$st2=$mysqli->prepare('call draw_card(?)');
+	$st2->bind_param('s', $res['p_turn']);
+	$st2->execute();
+	show_game();
+	
 }
 ?>
