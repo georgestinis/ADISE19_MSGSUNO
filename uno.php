@@ -30,7 +30,7 @@
 				header("HTTP/1.1 404 Not Found");
 			}
 			break;
-		case 'players': handle_players($method, $request, $input );
+		case 'players': handle_player($method, $request, $input );
 			break;
 		default: header("HTTP/1.1 404 Not Found");
 			exit;
@@ -46,9 +46,9 @@
 			reset_game();
 		}
 	}
-	function handle_players($method, $request, $input){
+	function handle_player($method, $request, $input){
 		switch ($b=array_shift($request)){
-			case "":
+			case '':
 			case null:
 				if($method=='GET'){
 					show_users($method);

@@ -24,7 +24,7 @@ $(function () {
 function fill_game(){	
 	$.ajax({type:"GET", url: "uno.php/game/", dataType:"json", success: fill_game_by_data });
 	$.ajax({type:"GET", url: "uno.php/players/", dataType:"json", success: fill_players });
-	player_turn();
+	//player_turn();
 	//$.ajax({type:"GET", url: "uno.php/status/", dataType:"json", success: player_turn });
 }
 
@@ -60,6 +60,31 @@ function fill_game_by_data(data){
 	}
 }
 
+function login_to_game(){
+	if($('#username').val()==''){
+		alert('You have to set a username');
+		return;
+	}
+	var p_name = $('#pname').val();
+	fill_game();
+	$.ajax({type: 'PUT', url: "uno.php/players/"+p_name,
+			dataType: "json", contentType: 'application/json',
+			data: JSON.stringify( {username: $('#username').val(), player_name: p_name}),
+			success: login_result, error: login_error});
+}
+
+function login_result(data){
+	me = data[0];
+	$('#game_initializer').hide();
+	update_info();
+	game_status_update();
+}
+
+function login_error(data,y,z,c) {
+	var x = data.responseJSON;
+	alert(x.errormesg);
+}
+
 function pass(e){
 	$.ajax({type:"PUT", url: "uno.php/game/pass", dataType:"json", success: player_turn });	
 }
@@ -70,7 +95,16 @@ function draw(e){
 
 function do_reset(e) {
 	$.ajax({type: 'POST', url: "uno.php/game/", dataType: "json", 
-			success: fill_game_by_data});
+			success: fill_game_by_data,
+			//error: alert("error")
+			});
+	$.ajax({type:"GET", url: "uno.php/players/", dataType:"json", success: fill_players });
+	//player_turn();
+	me={};
+	game_status={};
+	//setTimeout(function (){
+	//	$.ajax({type:"GET", url: "uno.php/status/", dataType:"json", success: player_turn });
+	//}, 100);
 }
 
 function game_status_update(){
