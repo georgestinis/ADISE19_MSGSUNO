@@ -55,7 +55,7 @@ function make_move($card){
 	$sql = 'select d.card_color, d.card_symbol from table_deck t inner join deck d on d.card_code=t.card_code order by table_id desc limit 1';
 	$st=$mysqli->query($sql);
 	$res=$st->fetch_assoc();
-	$st2=mysqli->prepare('coll do_move(?,?,?)');
+	$st2=$mysqli->prepare('call do_move(?,?,?)');
 	$st2->bind_param('sss',$res['card_color'], $res['card_symbol'], $card);
 	$st2->execute();
 	show_game();

@@ -144,7 +144,7 @@ function player_turn(){
 		$('#p1_turn').addClass("active");
 		$('#p2_turn').removeClass("active");
 	}
-	else if(game_status.p_turn=='p1'){
+	else if(game_status.p_turn=='p2'){
 		$('#p2_turn').addClass("active");
 		$('#p1_turn').removeClass("active");
 		

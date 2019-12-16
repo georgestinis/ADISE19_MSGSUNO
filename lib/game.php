@@ -56,16 +56,15 @@
 				break;
 			case 1: $new_status='initialized';
 				break;
-			case 2: $new_status=='started';
+			case 2: $new_status='started';
 					if($status['p_turn']==null){
 						$new_turn='p1';
 					}
 				break;	
 		}
-		$sql='update game_status set status=?, p_turn=?';
-		$st=$mysqli->prepare($sql);
-		$st->bind_param('ss',$new_status, $new_turn);
+		$sql = 'update game_status set status=?, p_turn=?';
+		$st = $mysqli->prepare($sql);
+		$st->bind_param('ss',$new_status,$new_turn);
 		$st->execute();
-		
 	}
 ?>
