@@ -24,7 +24,7 @@ $(function () {
 function fill_game(){	
 	$.ajax({type:"GET", url: "uno.php/game/", dataType:"json", success: fill_game_by_data });
 	$.ajax({type:"GET", url: "uno.php/players/", dataType:"json", success: fill_players });
-	//player_turn();
+	player_turn();
 	//$.ajax({type:"GET", url: "uno.php/status/", dataType:"json", success: player_turn });
 }
 
@@ -99,7 +99,7 @@ function do_reset(e) {
 			//error: alert("error")
 			});
 	$.ajax({type:"GET", url: "uno.php/players/", dataType:"json", success: fill_players });
-	//player_turn();
+	player_turn();
 	me={};
 	game_status={};
 	//setTimeout(function (){
@@ -139,4 +139,44 @@ function update_info(){
 	fill_game();	
 }
 
+function player_turn(){
+	if(game_status.p_turn=='p1'){
+		$('#p1_turn').addClass("active");
+		$('#p2_turn').removeClass("active");
+	}
+	else if(game_status.p_turn=='p1'){
+		$('#p2_turn').addClass("active");
+		$('#p1_turn').removeClass("active");
+		
+	}
+	else{
+		$('#p2_turn').removeClass("active");
+		$('#p1_turn').removeClass("active");
+	}
+}
+
+function fill_players(data){
+	for(var i=0; i<data.length; i++){
+		var obj=data[i];
+		if(obj.player_name=='p1'){
+			$('#player1').val(obj.username);
+		}
+		else if(obj.player_name=='p2'){
+			$('#player2').val(obj.username);
+		}
+	}
+}
+
+function do_move(e){
+	var x=$('#nextmove').val();
+	$('#nextmove').val('');
+	var obj={card_code:x};
+	var a = JSON.stringify(obj);
+	$.ajax({url:"uno.php/game/card", type:'PUT', data:a,
+			headers: { "Content-Type": "application/json"}, 
+            success: fill_game_by_data
+			});
+	player_turn();
+	
+}
 

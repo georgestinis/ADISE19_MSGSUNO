@@ -18,6 +18,8 @@
 					break;
 				case 'pass': pass_status();
 					break;
+				case 'card': handle_card($method, $input);
+					break;
 				default: header("HTTP/1.1 404 Not Found");
 					break;
 			}
@@ -64,6 +66,11 @@
 			default: header("HTTP/1.1 404 Not Found");
 					 print json_encode(['errormesg'=>"Player $b not found."]);
                 break;
+		}
+	}
+	function handle_card($method, $input){
+		if($method=='PUT'){
+			make_move($input['card_code']);
 		}
 	}
 ?>
