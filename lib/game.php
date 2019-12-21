@@ -2,12 +2,38 @@
 	function show_status() {
 		global $mysqli;
 		check_abort();
+		check_ended();
 		$sql = 'select * from game_status';
 		$st = $mysqli->prepare($sql);
 		$st->execute();
 		$res = $st->get_result();
 		header('Content-type: application/json');
 		print json_encode($res->fetch_all(MYSQLI_ASSOC), JSON_PRETTY_PRINT);
+	}
+	
+	function check_ended(){
+		global $mysqli;
+		$sqlc1 = 'select count(*) as c from hand where player_name="p1"';
+		$st = $mysqli->prepare($sqlc1);
+		$st->execute();
+		$res = $st->get_result();
+		$counter_p1 = $res->fetch_assoc()['c'];
+		$sqlc2 = 'select count(*) as c from hand where player_name="p2"';
+		$st = $mysqli->prepare($sqlc2);
+		$st->execute();
+		$res = $st->get_result();
+		$counter_p2 = $res->fetch_assoc()['c'];
+		if ($counter_p1==0){
+			$sql = "update game_status set status='ended', p_turn=null, result='p1'";
+			$st = $mysqli->prepare($sql);
+			$st->execute();
+		}
+		else if ($counter_p2==0){
+			$sql = "update game_status set status='ended', p_turn=null, result='p2'";
+			$st = $mysqli->prepare($sql);
+			$st->execute();
+		}
+		
 	}
 	
 	function pass_status(){

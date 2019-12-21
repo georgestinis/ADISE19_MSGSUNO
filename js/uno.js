@@ -71,6 +71,8 @@ function login_to_game(){
 			dataType: "json", contentType: 'application/json',
 			data: JSON.stringify( {username: $('#username').val(), player_name: p_name}),
 			success: login_result, error: login_error});
+	$('#username').val('');
+	$('#pname').val('p1');						
 }
 
 function login_result(data){
@@ -102,6 +104,7 @@ function do_reset(e) {
 	player_turn();
 	me={};
 	game_status={};
+	$('#game_initializer').show();
 	//setTimeout(function (){
 	//	$.ajax({type:"GET", url: "uno.php/status/", dataType:"json", success: player_turn });
 	//}, 100);
@@ -135,7 +138,7 @@ function update_status(data) {
 }
 
 function update_info(){
-	$('#game_info').html("I am Player: "+me.player_name+", my name is "+me.username +'<br>Token='+me.token+'<br>Game state: '+game_status.status);
+	$('#game_info').html("I am Player: "+me.player_name+", my name is "+me.username +'<br>Token='+me.token+'<br>Game state: '+game_status.status+'<br>Game result: '+game_status.result);
 	fill_game();	
 }
 
