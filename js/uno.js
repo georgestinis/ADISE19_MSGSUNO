@@ -105,6 +105,8 @@ function do_reset(e) {
 	me={};
 	game_status={};
 	$('#game_initializer').show();
+	$('#say_uno').removeClass("btn-warning");
+    $('#say_uno').addClass("btn-danger");
 	//setTimeout(function (){
 	//	$.ajax({type:"GET", url: "uno.php/status/", dataType:"json", success: player_turn });
 	//}, 100);
@@ -125,7 +127,7 @@ function update_status(data) {
 		$('#pass').prop('disabled', false);
 		$('#draw').prop('disabled', false);
 		$('#say_uno').prop('disabled', false);
-		setTimeout(function() { game_status_update();}, 4000);
+		setTimeout(function() { game_status_update(); get_uno(); }, 4000);
 	} else {
 		// must wait for something
 		$('#do_move').prop('disabled', true);
@@ -133,7 +135,7 @@ function update_status(data) {
 		$('#pass').prop('disabled', true);
 		$('#draw').prop('disabled', true);
 		$('#say_uno').prop('disabled', true);
-		setTimeout(function() { game_status_update();}, 4000);
+		setTimeout(function() { game_status_update(); get_uno(); }, 4000);
 	} 	
 }
 
@@ -183,3 +185,26 @@ function do_move(e){
 	
 }
 
+function get_uno(){
+	$.ajax({url:"uno.php/game/uno", dataType:"json", success: change_uno_btn});
+}
+
+function change_uno_btn(data){
+	var obj=data[0].uno_status;
+	if(obj=='active'){
+		$('#say_uno').removeClass("btn-danger");
+        $('#say_uno').addClass("btn-warning");
+	}
+	else{
+		$('#say_uno').removeClass("btn-warning");
+        $('#say_uno').addClass("btn-danger");
+	}
+}
+function say_uno(e){
+	$.ajax({type:'PUT', url:'uno.php/game/uno', dataType:"json", success: change_uno_btn., error:uno_btn_error});
+}
+
+function uno_btn_error(data,y,z,c) {
+    var x = data.responseJSON;
+    alert(x.errormesg);
+}

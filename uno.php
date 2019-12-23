@@ -20,6 +20,8 @@
 					break;
 				case 'card': handle_card($method, $input);
 					break;
+				case 'uno':change_uno($method);
+					break;
 				default: header("HTTP/1.1 404 Not Found");
 					break;
 			}
@@ -71,6 +73,15 @@
 	function handle_card($method, $input){
 		if($method=='PUT'){
 			make_move($input['card_code']);
+		}
+	}
+	
+	function change_uno($method){
+		if($method=='PUT'){
+			uno_status();
+		}
+		else if($method=='GET'){
+			show_uno();
 		}
 	}
 ?>

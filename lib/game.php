@@ -1,6 +1,7 @@
 <?php
 	function show_status() {
 		global $mysqli;
+		check_for_uno();
 		check_abort();
 		check_ended();
 		$sql = 'select * from game_status';
@@ -9,6 +10,30 @@
 		$res = $st->get_result();
 		header('Content-type: application/json');
 		print json_encode($res->fetch_all(MYSQLI_ASSOC), JSON_PRETTY_PRINT);
+	}
+	
+	function check_for_uno(){
+		global $mysqli;
+		$sqlc='select count(*) as c from hand h inner join game_status g on h.player_name=g.p_turn'
+		$st=$mysqli->prepare($sqlc);
+		$st->execute();
+		$res=$st->get_result();
+		$counter=$res->fetch_assoc()['c'];
+		$sql='select uno_status, p_turn from player p inner john game_status g on p.player_name=g.p_turn';
+		$st=$mysqli->prepare($sql);
+		$st->execute();
+		$res=$st->get_result();
+		$row=$res->fetch_assoc();
+		$player=$row['p_turn'];
+		$uno=$row['uno_status'];
+		if(($counter<2) && ($uno=='not_active')){
+			$sqlp='call general_draw(?)';
+			for($i=0; $i<2; $i++){
+				$st=$mysqli->prepare($sqlp);
+				$st->bind_param('s',$player);
+				$st->execute();
+			}
+		}
 	}
 	
 	function check_ended(){
@@ -93,4 +118,6 @@
 		$st->bind_param('ss',$new_status,$new_turn);
 		$st->execute();
 	}
+	
+	
 ?>

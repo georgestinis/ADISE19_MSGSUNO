@@ -60,4 +60,32 @@ function make_move($card){
 	$st2->execute();
 	show_game();
 }
+
+function uno_status(){
+	global $mysqli;
+	$sqlc='select count(*) as c from hand h inner join game_status g on h.player_name=g.p_turn'
+	$st=$mysqli->prepare($sqlc);
+	$st->execute();
+	$res=$st->get_result();
+	$counter=$res->fetch_assoc()['c'];
+	if($counter>2){
+		header("HTTP/1.1 400 Bad Request");
+        print json_encode(['errormesg'=>"You can't press uno yet."]);
+        exit;
+	}
+	$sql='call uno_status()';
+	$st=$mysqli->prepare($sql);
+	$st->execute();
+	show_uno();
+}
+
+function show_uno(){
+	global $mysqli;
+	$sql='select p.uno_status from player p.player_name inner join game_status g.p_turn '
+	$st=$mysql->prepare($sql);
+	$res=$st->get_result();
+	header('Content-type: application/json');
+	print json_encode($res->fetch_all(MYSQLI_ASSOC), JSON_PRETTY_PRINT);
+}
+
 ?>
