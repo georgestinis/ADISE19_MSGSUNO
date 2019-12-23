@@ -63,7 +63,7 @@ function make_move($card){
 
 function uno_status(){
 	global $mysqli;
-	$sqlc='select count(*) as c from hand h inner join game_status g on h.player_name=g.p_turn'
+	$sqlc='select count(*) as c from hand h inner join game_status g on h.player_name=g.p_turn';
 	$st=$mysqli->prepare($sqlc);
 	$st->execute();
 	$res=$st->get_result();
@@ -81,8 +81,9 @@ function uno_status(){
 
 function show_uno(){
 	global $mysqli;
-	$sql='select p.uno_status from player p.player_name inner join game_status g.p_turn '
-	$st=$mysql->prepare($sql);
+	$sql='select p.uno_status from player p inner join game_status g on g.p_turn=p.player_name';
+	$st=$mysqli->prepare($sql);
+	$st->execute();
 	$res=$st->get_result();
 	header('Content-type: application/json');
 	print json_encode($res->fetch_all(MYSQLI_ASSOC), JSON_PRETTY_PRINT);

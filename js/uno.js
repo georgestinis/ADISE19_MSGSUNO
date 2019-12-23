@@ -200,8 +200,9 @@ function change_uno_btn(data){
         $('#say_uno').addClass("btn-danger");
 	}
 }
+
 function say_uno(e){
-	$.ajax({type:'PUT', url:'uno.php/game/uno', dataType:"json", success: change_uno_btn., error:uno_btn_error});
+	$.ajax({type:'PUT', url: 'uno.php/game/uno', dataType:"json", success: change_uno_btn, error: uno_btn_error});
 }
 
 function uno_btn_error(data,y,z,c) {

@@ -14,21 +14,21 @@
 	
 	function check_for_uno(){
 		global $mysqli;
-		$sqlc='select count(*) as c from hand h inner join game_status g on h.player_name=g.p_turn'
+		$sqlc='select count(*) as c from hand h inner join game_status g on h.player_name=g.p_turn';
 		$st=$mysqli->prepare($sqlc);
 		$st->execute();
 		$res=$st->get_result();
 		$counter=$res->fetch_assoc()['c'];
-		$sql='select uno_status, p_turn from player p inner john game_status g on p.player_name=g.p_turn';
-		$st=$mysqli->prepare($sql);
+		$sqls='select uno_status, p_turn from player p inner join game_status g on p.player_name=g.p_turn';
+		$st=$mysqli->prepare($sqls);
 		$st->execute();
 		$res=$st->get_result();
 		$row=$res->fetch_assoc();
 		$player=$row['p_turn'];
 		$uno=$row['uno_status'];
-		if(($counter<2) && ($uno=='not_active')){
+		if(($counter<2) && ($uno=='not active')){
 			$sqlp='call general_draw(?)';
-			for($i=0; $i<2; $i++){
+			for($i=0; $i<=2; $i++){
 				$st=$mysqli->prepare($sqlp);
 				$st->bind_param('s',$player);
 				$st->execute();
