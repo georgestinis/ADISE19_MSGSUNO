@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Φιλοξενητής: 127.0.0.1
--- Χρόνος δημιουργίας: 23 Δεκ 2019 στις 17:54:34
+-- Χρόνος δημιουργίας: 24 Δεκ 2019 στις 16:46:49
 -- Έκδοση διακομιστή: 10.4.8-MariaDB
 -- Έκδοση PHP: 7.3.11
 
@@ -43,6 +43,9 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `do_move` (IN `table_card_color` ENU
     DECLARE c_symbol ENUM('0','1','2','3','4','5','6','7','8','9','+4','+2','R','S','N');
     SELECT p_turn INTO player_turn FROM game_status;
     SELECT d.card_color, d.card_symbol, h.card_id into c_color, c_symbol, c_id FROM hand h INNER JOIN deck d on h.card_id=d.card_id WHERE d.card_code=c_code AND h.player_name=player_turn LIMIT 1;    
+    IF table_card_color = 'W' THEN 
+    	SELECT wild_card_color INTO table_card_color FROM table_deck order by table_id desc limit 1; 
+    END IF;
     IF c_symbol = 'S' THEN 
     	CALL skip_do_move(table_card_color, table_card_symbol, c_code, c_color, c_id, player_turn);
     ELSEIF c_symbol = 'R' THEN
@@ -50,6 +53,23 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `do_move` (IN `table_card_color` ENU
     ELSE
     	CALL regular_do_move(table_card_color, c_code, c_color, c_id, player_turn, table_card_symbol, c_symbol);
     END IF;
+END$$
+
+DROP PROCEDURE IF EXISTS `do_wildcard_move`$$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `do_wildcard_move` (IN `c_code` VARCHAR(3), IN `c_color` ENUM('R','Y','B','G'))  BEGIN
+	DECLARE c_id TINYINT;
+	DECLARE player_turn ENUM('p1', 'p2');
+    SELECT p_turn INTO player_turn FROM game_status;
+    SELECT h.card_id into c_id FROM hand h INNER JOIN deck d on h.card_id=d.card_id WHERE d.card_code=c_code AND h.player_name=player_turn LIMIT 1;    
+    IF c_color != '' THEN
+        INSERT INTO table_deck (card_code, wild_card_color) VALUES (c_code, c_color);
+        DELETE FROM hand WHERE player_name=player_turn AND card_id=c_id;
+        IF player_turn = 'p1' THEN
+            UPDATE game_status SET p_turn='p2', draw_counter=0; 
+        ELSE 
+            UPDATE game_status SET p_turn='p1', draw_counter=0; 
+        END IF;
+	END IF;
 END$$
 
 DROP PROCEDURE IF EXISTS `draw_card`$$
@@ -131,8 +151,12 @@ END$$
 DROP PROCEDURE IF EXISTS `start_game`$$
 CREATE DEFINER=`root`@`localhost` PROCEDURE `start_game` ()  BEGIN
 DECLARE c_code varchar(3);
+DECLARE c_color ENUM('R', 'Y', 'B', 'G', 'W');
 DECLARE p_name ENUM('p1', 'p2');
-SELECT card_code INTO c_code FROM remaining_deck ORDER BY RAND() LIMIT 1;
+SELECT card_code, card_color INTO c_code, c_color FROM remaining_deck ORDER BY RAND() LIMIT 1;
+WHILE c_color = 'W' DO 
+	SELECT card_code, card_color INTO c_code, c_color FROM remaining_deck ORDER BY RAND() LIMIT 1;
+END WHILE;
 ALTER TABLE table_deck AUTO_INCREMENT = 0;
 INSERT INTO table_deck(card_code) VALUES (c_code);
 DELETE FROM remaining_deck WHERE c_code = card_code;
@@ -302,7 +326,7 @@ CREATE TABLE `game_status` (
 --
 
 INSERT INTO `game_status` (`status`, `p_turn`, `draw_counter`, `result`, `last_change`) VALUES
-('not active', NULL, 0, NULL, '2019-12-22 15:41:10');
+('started', 'p1', 0, NULL, '2019-12-24 15:46:06');
 
 --
 -- Δείκτες `game_status`
@@ -332,20 +356,12 @@ CREATE TABLE `hand` (
 --
 
 INSERT INTO `hand` (`player_name`, `card_id`) VALUES
-('p2', 1),
-('p2', 6),
-('p1', 17),
-('p1', 19),
-('p2', 36),
-('p1', 43),
-('p2', 48),
+('p1', 33),
+('p1', 38),
+('p2', 47),
 ('p1', 50),
-('p1', 67),
-('p2', 76),
-('p1', 81),
-('p2', 83),
-('p2', 87),
-('p1', 100);
+('p1', 63),
+('p2', 92);
 
 -- --------------------------------------------------------
 
@@ -367,8 +383,8 @@ CREATE TABLE `player` (
 --
 
 INSERT INTO `player` (`player_name`, `username`, `uno_status`, `token`, `last_action`) VALUES
-('p1', NULL, 'not active', NULL, '2019-12-22 15:41:09'),
-('p2', NULL, 'not active', NULL, '2019-12-22 15:41:09');
+('p1', 'FDSGFDG', 'not active', '72453f68ca58d5463c08802ccf528c56', '2019-12-24 15:41:30'),
+('p2', 'DFGFDG', 'not active', '93e15facdc83be34473b81cb08212c7f', '2019-12-24 15:41:34');
 
 -- --------------------------------------------------------
 
@@ -389,26 +405,22 @@ CREATE TABLE `remaining_deck` (
 --
 
 INSERT INTO `remaining_deck` (`card_id`, `card_symbol`, `card_color`, `card_code`) VALUES
+(1, '0', 'R', '0R'),
 (2, '1', 'R', '1R'),
 (3, '1', 'R', '1R'),
 (4, '2', 'R', '2R'),
-(5, '2', 'R', '2R'),
+(6, '3', 'R', '3R'),
 (7, '3', 'R', '3R'),
 (8, '4', 'R', '4R'),
 (9, '4', 'R', '4R'),
-(10, '5', 'R', '5R'),
 (11, '5', 'R', '5R'),
 (12, '6', 'R', '6R'),
 (13, '6', 'R', '6R'),
-(14, '7', 'R', '7R'),
 (15, '7', 'R', '7R'),
-(16, '8', 'R', '8R'),
 (18, '9', 'R', '9R'),
-(20, '+2', 'R', '+2R'),
 (21, '+2', 'R', '+2R'),
 (22, 'R', 'R', 'RR'),
 (23, 'R', 'R', 'RR'),
-(24, 'S', 'R', 'SR'),
 (25, 'S', 'R', 'SR'),
 (26, '0', 'Y', '0Y'),
 (27, '1', 'Y', '1Y'),
@@ -417,33 +429,26 @@ INSERT INTO `remaining_deck` (`card_id`, `card_symbol`, `card_color`, `card_code
 (30, '2', 'Y', '2Y'),
 (31, '3', 'Y', '3Y'),
 (32, '3', 'Y', '3Y'),
-(33, '4', 'Y', '4Y'),
 (34, '4', 'Y', '4Y'),
 (35, '5', 'Y', '5Y'),
+(36, '5', 'Y', '5Y'),
 (37, '6', 'Y', '6Y'),
-(38, '6', 'Y', '6Y'),
 (39, '7', 'Y', '7Y'),
 (40, '7', 'Y', '7Y'),
 (41, '8', 'Y', '8Y'),
 (42, '8', 'Y', '8Y'),
+(43, '9', 'Y', '9Y'),
 (44, '9', 'Y', '9Y'),
 (45, '+2', 'Y', '+2Y'),
 (46, '+2', 'Y', '+2Y'),
-(47, 'R', 'Y', 'RY'),
+(48, 'R', 'Y', 'RY'),
 (49, 'S', 'Y', 'SY'),
 (51, '0', 'B', '0B'),
-(52, '1', 'B', '1B'),
 (53, '1', 'B', '1B'),
-(54, '2', 'B', '2B'),
-(55, '2', 'B', '2B'),
-(56, '3', 'B', '3B'),
-(57, '3', 'B', '3B'),
 (58, '4', 'B', '4B'),
 (59, '4', 'B', '4B'),
 (60, '5', 'B', '5B'),
 (61, '5', 'B', '5B'),
-(62, '6', 'B', '6B'),
-(63, '6', 'B', '6B'),
 (64, '7', 'B', '7B'),
 (65, '7', 'B', '7B'),
 (66, '8', 'B', '8B'),
@@ -451,29 +456,27 @@ INSERT INTO `remaining_deck` (`card_id`, `card_symbol`, `card_color`, `card_code
 (69, '9', 'B', '9B'),
 (70, '+2', 'B', '+2B'),
 (71, '+2', 'B', '+2B'),
+(72, 'R', 'B', 'RB'),
 (74, 'S', 'B', 'SB'),
-(75, 'S', 'B', 'SB'),
+(76, '0', 'G', '0G'),
 (77, '1', 'G', '1G'),
-(78, '1', 'G', '1G'),
 (79, '2', 'G', '2G'),
 (80, '2', 'G', '2G'),
+(81, '3', 'G', '3G'),
 (82, '3', 'G', '3G'),
+(83, '4', 'G', '4G'),
 (84, '4', 'G', '4G'),
 (85, '5', 'G', '5G'),
-(86, '5', 'G', '5G'),
 (88, '6', 'G', '6G'),
-(89, '7', 'G', '7G'),
 (90, '7', 'G', '7G'),
 (91, '8', 'G', '8G'),
-(92, '8', 'G', '8G'),
 (93, '9', 'G', '9G'),
-(94, '9', 'G', '9G'),
 (95, '+2', 'G', '+2G'),
 (96, '+2', 'G', '+2G'),
 (97, 'R', 'G', 'RG'),
 (98, 'R', 'G', 'RG'),
 (99, 'S', 'G', 'SG'),
-(101, '+4', 'W', '4W'),
+(100, 'S', 'G', 'SG'),
 (102, '+4', 'W', '4W'),
 (103, '+4', 'W', '4W'),
 (104, '+4', 'W', '4W'),
@@ -491,15 +494,37 @@ INSERT INTO `remaining_deck` (`card_id`, `card_symbol`, `card_color`, `card_code
 DROP TABLE IF EXISTS `table_deck`;
 CREATE TABLE `table_deck` (
   `table_id` tinyint(4) NOT NULL,
-  `card_code` varchar(3) COLLATE utf8_bin NOT NULL
+  `card_code` varchar(3) COLLATE utf8_bin NOT NULL,
+  `wild_card_color` enum('R','Y','B','G') COLLATE utf8_bin DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 --
 -- Άδειασμα δεδομένων του πίνακα `table_deck`
 --
 
-INSERT INTO `table_deck` (`table_id`, `card_code`) VALUES
-(1, 'RB');
+INSERT INTO `table_deck` (`table_id`, `card_code`, `wild_card_color`) VALUES
+(1, '8R', NULL),
+(2, '2R', NULL),
+(3, '2B', NULL),
+(4, '1B', NULL),
+(5, 'RB', NULL),
+(6, '8B', NULL),
+(7, 'SB', NULL),
+(8, '3B', NULL),
+(9, '3B', NULL),
+(10, '2B', NULL),
+(11, '6B', NULL),
+(12, '4W', 'G'),
+(13, '1G', NULL),
+(14, '6G', NULL),
+(15, '5G', NULL),
+(16, '7G', NULL),
+(17, '9G', NULL),
+(18, '9R', NULL),
+(19, 'SR', NULL),
+(20, '5R', NULL),
+(21, '+2R', NULL),
+(22, '7R', NULL);
 
 --
 -- Ευρετήρια για άχρηστους πίνακες
@@ -544,7 +569,7 @@ ALTER TABLE `table_deck`
 -- AUTO_INCREMENT για πίνακα `table_deck`
 --
 ALTER TABLE `table_deck`
-  MODIFY `table_id` tinyint(4) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `table_id` tinyint(4) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- Περιορισμοί για άχρηστους πίνακες

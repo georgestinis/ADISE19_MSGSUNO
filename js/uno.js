@@ -52,6 +52,9 @@ function fill_game_by_data(data){
 			else{
 				if(game_status.status=='started'){
 					$('#table_card').html(obj.card_code);
+					if (obj.wild_card_color!=null){
+						$('#table_card').append(obj.wild_card_color);
+					}
 				}else{
 					$('#table_card').html("[]");
 				}
@@ -127,7 +130,12 @@ function update_status(data) {
 		$('#pass').prop('disabled', false);
 		$('#draw').prop('disabled', false);
 		$('#say_uno').prop('disabled', false);
-		setTimeout(function() { game_status_update(); get_uno(); }, 4000);
+		setTimeout(function() { 
+			game_status_update(); 
+			if (game_status.status=='started'){
+				get_uno(); 
+			}
+		}, 4000);
 	} else {
 		// must wait for something
 		$('#do_move').prop('disabled', true);
@@ -135,7 +143,12 @@ function update_status(data) {
 		$('#pass').prop('disabled', true);
 		$('#draw').prop('disabled', true);
 		$('#say_uno').prop('disabled', true);
-		setTimeout(function() { game_status_update(); get_uno(); }, 4000);
+		setTimeout(function() { 
+			game_status_update(); 
+			if (game_status.status=='started'){
+				get_uno(); 
+			}
+		}, 4000);
 	} 	
 }
 
@@ -174,15 +187,23 @@ function fill_players(data){
 
 function do_move(e){
 	var x=$('#nextmove').val();
+	var xa = x.split(' ');
+	var xcode = xa[0];
+	var xcolor = xa[1];
 	$('#nextmove').val('');
-	var obj={card_code:x};
+	var obj;
+	if(typeof xcolor == 'undefined'){
+		obj={card_code:xcode};	
+	}
+	else {
+		obj={card_code:xcode, card_color:xcolor};
+	}	
 	var a = JSON.stringify(obj);
 	$.ajax({url:"uno.php/game/card", type:'PUT', data:a,
 			headers: { "Content-Type": "application/json"}, 
             success: fill_game_by_data
 			});
 	player_turn();
-	
 }
 
 function get_uno(){

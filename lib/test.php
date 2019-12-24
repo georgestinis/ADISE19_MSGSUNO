@@ -61,6 +61,15 @@ function make_move($card){
 	show_game();
 }
 
+function make_w_move($card_code, $card_color){
+	global $mysqli;
+	$st=$mysqli->prepare('call do_wildcard_move(?,?)');
+	$st->bind_param('ss', $card_code, $card_color);
+	$st->execute();
+	show_game();
+}
+
+
 function uno_status(){
 	global $mysqli;
 	$sqlc='select count(*) as c from hand h inner join game_status g on h.player_name=g.p_turn';
