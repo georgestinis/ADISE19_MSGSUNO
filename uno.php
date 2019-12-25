@@ -75,7 +75,7 @@
 			if(count($input)==1){
 				make_move($input['card_code']);
 			}
-			else if(count($input==2)){
+			else if(count($input)==2){
 				make_w_move($input['card_code'], $input['card_color']);
 			}
 		}
